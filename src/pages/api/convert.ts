@@ -7,6 +7,13 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = require('pdfjs-dist/build/pdf.worker.js
 const NodeCanvasFactory = require('pdfjs-dist/build/pdf.js').NodeCanvasFactory;
 (pdfjsLib as any).NodeCanvasFactory = NodeCanvasFactory;
 
+// Add fallback font configuration
+const fallbackFontPath = require.resolve('pdfjs-dist/web/standard_fonts/Helvetica.ttf');
+(pdfjsLib as any).GlobalWorkerOptions.fallbackFontPath = fallbackFontPath;
+
+// Disable font loading warnings
+(pdfjsLib as any).GlobalWorkerOptions.disableFontFace = true;
+
 // Add standard font configuration
 const standardFontDataUrl = require.resolve('pdfjs-dist/standard_fonts/');
 (pdfjsLib as any).GlobalWorkerOptions.standardFontDataUrl = standardFontDataUrl;
