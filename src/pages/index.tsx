@@ -24,11 +24,13 @@ export default function Home() {
     setError(null);
 
     try {
-      // Convert file to base64
       const base64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result as string);
+        reader.readAsArrayBuffer(file);
+        reader.onload = () => {
+          const buffer = Buffer.from(reader.result as ArrayBuffer);
+          resolve(buffer.toString('base64'));
+        };
         reader.onerror = reject;
       });
 
