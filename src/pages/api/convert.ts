@@ -45,10 +45,10 @@ export default async function handler(
     const buffer = Buffer.from(pdf, 'base64');
     const uint8Array = new Uint8Array(buffer);
 
-    // Use the standard fonts directly from node_modules
+    // Use path to a specific font file as the base directory
     const doc = await pdfjsLib.getDocument({
       data: uint8Array,
-      standardFontDataUrl: require.resolve('pdfjs-dist/standard_fonts/')
+      standardFontDataUrl: require.resolve('pdfjs-dist/standard_fonts/LiberationSans-Regular.ttf').replace('LiberationSans-Regular.ttf', '')
     }).promise;
 
     const images = [];
