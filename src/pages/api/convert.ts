@@ -37,12 +37,26 @@ export default async function handler(
   }
 
   try {
-    const { pdf } = req.body;
-    if (!pdf) {
-      return res.status(400).json({ error: 'No PDF data provided' });
+    let buffer: Buffer;
+    const contentType = req.headers['content-type'];
+
+    if (contentType === 'application/pdf') {
+      // Handle raw PDF data
+      buffer = req.body;
+    } else if (contentType?.includes('application/json')) {
+      // Handle JSON with base64
+      const { pdf } = req.body;
+      if (!pdf) {
+        return res.status(400).json({ error: 'No PDF data provided' });
+      }
+      buffer = Buffer.from(pdf, 'base64');
+    } else {
+      return res.status(400).json({
+        error: 'Invalid Content-Type',
+        details: `Expected application/pdf or application/json, got ${contentType}`
+      });
     }
 
-    const buffer = Buffer.from(pdf, 'base64');
     const uint8Array = new Uint8Array(buffer);
     const doc = await pdfjsLib.getDocument(uint8Array).promise;
     const images = [];
