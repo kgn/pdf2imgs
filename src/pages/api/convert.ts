@@ -1,15 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import * as pdfjsLib from 'pdfjs-dist';
-import path from 'path';
-const { createCanvas, registerFont } = require('canvas');
+const { createCanvas } = require('canvas');
 
-// Register a default font
-registerFont(path.join(process.cwd(), 'fonts', 'Arial.ttf'), { family: 'Arial' });
-
-// Basic pdf.js configuration
+// Configure pdf.js
 pdfjsLib.GlobalWorkerOptions.workerSrc = require('pdfjs-dist/build/pdf.worker.js');
 const NodeCanvasFactory = require('pdfjs-dist/build/pdf.js').NodeCanvasFactory;
 (pdfjsLib as any).NodeCanvasFactory = NodeCanvasFactory;
+
+// Set the standard font data URL with the correct domain
+(pdfjsLib as any).GlobalWorkerOptions.standardFontDataUrl = 'https://pdf2imgs.vercel.app/Arial.ttf';
 
 export const config = {
   api: {
