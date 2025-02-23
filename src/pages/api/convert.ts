@@ -46,10 +46,9 @@ export default async function handler(
     const buffer = Buffer.from(pdf, 'base64');
     const uint8Array = new Uint8Array(buffer);
 
-    // Use path relative to node_modules
     const doc = await pdfjsLib.getDocument({
       data: uint8Array,
-      standardFontDataUrl: path.join(process.cwd(), 'node_modules/pdfjs-dist/standard_fonts/')
+      standardFontDataUrl: path.join(process.cwd(), 'standard_fonts/')
     }).promise;
 
     const images = [];
