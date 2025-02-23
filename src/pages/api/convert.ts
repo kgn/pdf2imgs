@@ -2,8 +2,10 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import * as pdfjsLib from 'pdfjs-dist';
 const { createCanvas } = require('canvas');
 
-// Set the worker path to use local version
-pdfjsLib.GlobalWorkerOptions.workerSrc = `/pdf.worker.min.js`;
+// Configure pdf.js to use the Node canvas and fake worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = null as any;
+const NodeCanvasFactory = require('pdfjs-dist/lib/test/utils/node-canvas-factory');
+(pdfjsLib as any).NodeCanvasFactory = NodeCanvasFactory;
 
 export const config = {
   api: {
