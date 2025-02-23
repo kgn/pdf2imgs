@@ -3,8 +3,12 @@ import * as pdfjsLib from 'pdfjs-dist';
 import path from 'path';
 const { createCanvas } = require('canvas');
 
-// Configure pdf.js
+// Configure pdf.js worker
+// This is required for pdf.js to work in Node.js environment
 pdfjsLib.GlobalWorkerOptions.workerSrc = require('pdfjs-dist/build/pdf.worker.js');
+
+// Set up canvas factory for Node environment
+// pdf.js needs this to render PDFs without a browser
 const NodeCanvasFactory = require('pdfjs-dist/build/pdf.js').NodeCanvasFactory;
 (pdfjsLib as any).NodeCanvasFactory = NodeCanvasFactory;
 
@@ -38,14 +42,29 @@ export default async function handler(
   }
 
   try {
-    const { pdf } = req.body;
-    if (!pdf) {
-      return res.status(400).json({ error: 'No PDF data provided' });
+    // Handle both JSON with base64 and raw PDF input
+    let uint8Array: Uint8Array;
+
+    if (req.headers['content-type'] === 'application/pdf') {
+      // Handle raw PDF input
+      const chunks: Uint8Array[] = [];
+      for await (const chunk of req) {
+        chunks.push(chunk);
+      }
+      uint8Array = Buffer.concat(chunks);
+    } else {
+      // Handle JSON with base64 input
+      const { pdf } = req.body;
+      if (!pdf) {
+        return res.status(400).json({ error: 'No PDF data provided' });
+      }
+      const buffer = Buffer.from(pdf, 'base64');
+      uint8Array = new Uint8Array(buffer);
     }
 
-    const buffer = Buffer.from(pdf, 'base64');
-    const uint8Array = new Uint8Array(buffer);
-
+    // Point to standard fonts directory in project root
+    // These fonts are required for proper text rendering in PDFs
+    // We keep them in the repo to ensure they're available in production
     const doc = await pdfjsLib.getDocument({
       data: uint8Array,
       standardFontDataUrl: path.join(process.cwd(), 'standard_fonts/')
@@ -53,6 +72,7 @@ export default async function handler(
 
     const images = [];
 
+    // Convert each page to an image
     for (let i = 1; i <= doc.numPages; i++) {
       const page = await doc.getPage(i);
       const viewport = page.getViewport({ scale: 2.0 });

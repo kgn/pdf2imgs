@@ -14,6 +14,14 @@ API_KEY=your-secret-key-here
 npm run dev
 ```
 
+## Testing
+
+Visit the homepage to test PDF conversion using a simple upload interface:
+
+![Screenshot of testing interface](screenshot.jpeg)
+
+This provides a quick way to verify that PDFs are being properly converted to images.
+
 ## API Usage
 
 The API supports two ways to send PDFs:
