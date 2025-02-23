@@ -24,16 +24,31 @@ The PDF conversion endpoint is protected by an API key. To use it:
 1. Include your API key in the request headers:
 ```javascript
 headers: {
+  'Content-Type': 'application/json',
   'x-api-key': 'your-secret-key-here'
 }
 ```
 
-2. Send a POST request to `/api/convert` with your PDF file in form-data format.
+2. Send a POST request to `/api/convert` with your PDF file as base64.
+
+Example JavaScript usage:
+```javascript
+const base64PDF = // your base64 encoded PDF
+const response = await fetch('http://localhost:3000/api/convert', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-api-key': 'your-secret-key-here'
+  },
+  body: JSON.stringify({ pdf: base64PDF })
+});
+```
 
 Example curl request:
 ```bash
 curl -X POST \
+  -H "Content-Type: application/json" \
   -H "x-api-key: your-secret-key-here" \
-  -F "pdf=@/path/to/your/file.pdf" \
+  -d '{"pdf":"base64_encoded_pdf_here"}' \
   http://localhost:3000/api/convert
 ```

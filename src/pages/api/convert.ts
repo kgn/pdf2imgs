@@ -13,9 +13,6 @@ export const config = {
   },
 };
 
-import formidable from 'formidable';
-import { createReadStream } from 'fs';
-
 type ResponseData = {
   error?: string;
   details?: string;
@@ -38,29 +35,17 @@ export default async function handler(
   }
 
   try {
-    const form = formidable();
-    const [fields, files] = await form.parse(req);
-    const file = files.pdf?.[0];
-
-    if (!file) {
-      console.log('No file found in request');
-      return res.status(400).json({ error: 'No PDF file provided' });
+    const { pdf } = req.body;
+    if (!pdf) {
+      return res.status(400).json({ error: 'No PDF data provided' });
     }
 
-    console.log('File received:', file.originalFilename);
+    // Convert base64 to Buffer
+    const base64Data = pdf.split(';base64,').pop();
+    const buffer = Buffer.from(base64Data, 'base64');
 
-    // Read the file
-    const buffer = await new Promise<Buffer>((resolve, reject) => {
-      const chunks: Buffer[] = [];
-      const readStream = createReadStream(file.filepath);
-      readStream.on('data', (chunk: Buffer) => chunks.push(chunk));
-      readStream.on('error', reject);
-      readStream.on('end', () => resolve(Buffer.concat(chunks)));
-    });
-
-    // Convert Buffer to Uint8Array before passing to pdf.js
+    // Convert Buffer to Uint8Array
     const uint8Array = new Uint8Array(buffer);
-    // Use uint8Array instead of buffer when loading the PDF
     const doc = await pdfjsLib.getDocument(uint8Array).promise;
     console.log('PDF loaded successfully, pages:', doc.numPages);
     const images = [];

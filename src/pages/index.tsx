@@ -24,15 +24,21 @@ export default function Home() {
     setError(null);
 
     try {
-      const formData = new FormData();
-      formData.append('pdf', file);
+      // Convert file to base64
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+      });
 
       const response = await fetch('/api/convert', {
         method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           'x-api-key': apiKey,
         },
-        body: formData,
+        body: JSON.stringify({ pdf: base64 }),
       });
 
       if (!response.ok) {
