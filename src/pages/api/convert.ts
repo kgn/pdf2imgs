@@ -7,13 +7,6 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = require('pdfjs-dist/build/pdf.worker.js
 const NodeCanvasFactory = require('pdfjs-dist/build/pdf.js').NodeCanvasFactory;
 (pdfjsLib as any).NodeCanvasFactory = NodeCanvasFactory;
 
-// Set the standard font data URL to our public fonts directory that contains the pdf.js standard fonts
-(pdfjsLib as any).GlobalWorkerOptions.standardFontDataUrl = 'https://pdf2imgs.vercel.app/standard_fonts/';
-
-// Disable font loading and force standard fonts
-(pdfjsLib as any).GlobalWorkerOptions.disableFontFace = true;
-(pdfjsLib as any).GlobalWorkerOptions.useSystemFonts = true;
-
 export const config = {
   api: {
     bodyParser: {
@@ -44,28 +37,20 @@ export default async function handler(
   }
 
   try {
-    let buffer: Buffer;
-    const contentType = req.headers['content-type'];
-
-    if (contentType === 'application/pdf') {
-      // Handle raw PDF data
-      buffer = req.body;
-    } else if (contentType?.includes('application/json')) {
-      // Handle JSON with base64
-      const { pdf } = req.body;
-      if (!pdf) {
-        return res.status(400).json({ error: 'No PDF data provided' });
-      }
-      buffer = Buffer.from(pdf, 'base64');
-    } else {
-      return res.status(400).json({
-        error: 'Invalid Content-Type',
-        details: `Expected application/pdf or application/json, got ${contentType}`
-      });
+    const { pdf } = req.body;
+    if (!pdf) {
+      return res.status(400).json({ error: 'No PDF data provided' });
     }
 
+    const buffer = Buffer.from(pdf, 'base64');
     const uint8Array = new Uint8Array(buffer);
-    const doc = await pdfjsLib.getDocument(uint8Array).promise;
+
+    // Use the standard fonts directly from node_modules
+    const doc = await pdfjsLib.getDocument({
+      data: uint8Array,
+      standardFontDataUrl: require.resolve('pdfjs-dist/standard_fonts/')
+    }).promise;
+
     const images = [];
 
     for (let i = 1; i <= doc.numPages; i++) {
