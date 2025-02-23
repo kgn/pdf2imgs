@@ -2,10 +2,14 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import * as pdfjsLib from 'pdfjs-dist';
 const { createCanvas } = require('canvas');
 
-// Configure pdf.js to use the Node canvas and fake worker
+// Configure pdf.js
 pdfjsLib.GlobalWorkerOptions.workerSrc = require('pdfjs-dist/build/pdf.worker.js');
 const NodeCanvasFactory = require('pdfjs-dist/build/pdf.js').NodeCanvasFactory;
 (pdfjsLib as any).NodeCanvasFactory = NodeCanvasFactory;
+
+// Add standard font configuration
+const standardFontDataUrl = require.resolve('pdfjs-dist/standard_fonts/');
+(pdfjsLib as any).GlobalWorkerOptions.standardFontDataUrl = standardFontDataUrl;
 
 export const config = {
   api: {
