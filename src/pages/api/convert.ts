@@ -9,7 +9,9 @@ const NodeCanvasFactory = require('pdfjs-dist/build/pdf.js').NodeCanvasFactory;
 
 export const config = {
   api: {
-    bodyParser: false, // Disable built-in bodyParser
+    bodyParser: {
+      sizeLimit: '10mb', // Adjust this limit based on your needs
+    },
   },
 };
 
