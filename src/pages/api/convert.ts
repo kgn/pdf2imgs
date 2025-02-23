@@ -7,8 +7,9 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = require('pdfjs-dist/build/pdf.worker.js
 const NodeCanvasFactory = require('pdfjs-dist/build/pdf.js').NodeCanvasFactory;
 (pdfjsLib as any).NodeCanvasFactory = NodeCanvasFactory;
 
-// Set the standard font data URL with the correct domain
-(pdfjsLib as any).GlobalWorkerOptions.standardFontDataUrl = 'https://pdf2imgs.vercel.app/Arial.ttf';
+// Disable font loading and force standard fonts
+(pdfjsLib as any).GlobalWorkerOptions.disableFontFace = true;
+(pdfjsLib as any).GlobalWorkerOptions.useSystemFonts = true;
 
 export const config = {
   api: {
