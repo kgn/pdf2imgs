@@ -55,16 +55,20 @@ export default async function handler(
 
     for (let i = 1; i <= doc.numPages; i++) {
       const page = await doc.getPage(i);
-      const viewport = page.getViewport({ scale: 4.0 });
+      const viewport = page.getViewport({ scale: 2.0 });
       const canvas = createCanvas(viewport.width, viewport.height);
       const context = canvas.getContext('2d');
 
-      await page.render({ canvasContext: context, viewport }).promise;
-      const dataUrl = canvas.toDataURL('image/png');
+      await page.render({
+        canvasContext: context,
+        viewport: viewport,
+      }).promise;
+
+      const imageData = canvas.toDataURL('image/jpeg', 0.8);
 
       images.push({
         page: i,
-        data: dataUrl
+        data: imageData
       });
     }
 
