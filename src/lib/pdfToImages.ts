@@ -1,39 +1,22 @@
 import * as pdfjsLib from 'pdfjs-dist';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.js';
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js`;
 
-type PDFToImagesOptions = {
-  scale?: number;
-  onProgress?: (progress: { current: number; total: number }) => void;
-  onStart?: (progress: { current: 0; total: number }) => void;
-};
+export async function pdfToImages(pdfData: ArrayBuffer): Promise<string[]> {
+  const doc = await pdfjsLib.getDocument(new Uint8Array(pdfData)).promise;
+  const imagePaths = [];
 
-const pdfToImages = async (pdf: string, options?: PDFToImagesOptions): Promise<string[]> => {
-  const output = [];
-  const doc = await pdfjsLib.getDocument(pdf).promise;
-
-  options.onStart && options.onStart({ current: 0, total: doc.numPages });
-
-  for (let i = 1; i < doc.numPages + 1; i++) {
-    const canvas = document.createElement('canvas');
-
+  for (let i = 1; i <= doc.numPages; i++) {
     const page = await doc.getPage(i);
-    const context = canvas.getContext('2d');
-    const viewport = page.getViewport({ scale: options.scale || 1 });
-    canvas.height = viewport.height;
+    const viewport = page.getViewport({ scale: 2.0 });
+    const canvas = document.createElement('canvas');
     canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    const context = canvas.getContext('2d');
 
-    await page.render({
-      canvasContext: context,
-      viewport,
-    }).promise;
-
-    options.onProgress && options.onProgress({ current: i, total: doc.numPages });
-
-    output.push(canvas.toDataURL('image/png'));
+    await page.render({ canvasContext: context, viewport }).promise;
+    imagePaths.push(canvas.toDataURL('image/png'));
   }
 
-  return output;
-};
-
-export default pdfToImages;
+  return imagePaths;
+}
