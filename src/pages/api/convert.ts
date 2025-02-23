@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import * as pdfjsLib from 'pdfjs-dist';
+import path from 'path';
 const { createCanvas } = require('canvas');
 
 // Configure pdf.js
@@ -45,10 +46,10 @@ export default async function handler(
     const buffer = Buffer.from(pdf, 'base64');
     const uint8Array = new Uint8Array(buffer);
 
-    // Use path to a specific font file as the base directory
+    // Use path relative to node_modules
     const doc = await pdfjsLib.getDocument({
       data: uint8Array,
-      standardFontDataUrl: require.resolve('pdfjs-dist/standard_fonts/LiberationSans-Regular.ttf').replace('LiberationSans-Regular.ttf', '')
+      standardFontDataUrl: path.join(process.cwd(), 'node_modules/pdfjs-dist/standard_fonts/')
     }).promise;
 
     const images = [];
