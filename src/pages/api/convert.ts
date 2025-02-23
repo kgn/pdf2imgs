@@ -3,7 +3,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 const { createCanvas } = require('canvas');
 
 // Configure pdf.js to use the Node canvas and fake worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = null as any;
+pdfjsLib.GlobalWorkerOptions.workerSrc = require('pdfjs-dist/build/pdf.worker.js');
 const NodeCanvasFactory = require('pdfjs-dist/build/pdf.js').NodeCanvasFactory;
 (pdfjsLib as any).NodeCanvasFactory = NodeCanvasFactory;
 
