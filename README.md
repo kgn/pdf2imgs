@@ -1,10 +1,42 @@
-# PDF Parser
+# PDF to Images
 
-A tool to parse PDF files and extract text.
+A tool to parse PDF files and extract images. This is useful to pass to LLMs that require images.
+
+## Example for OpenAI o1
+
+```javascript
+// Convert PDF to images
+const response = await fetch('/api/convert', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-api-key': 'your-api-key'
+  },
+  body: JSON.stringify({ pdf: base64PdfContent })
+});
+
+const { images } = await response.json();
+
+// Create OpenAI message with images
+const messages = [
+  {
+    role: 'user',
+    content: [
+      { type: 'text', text: 'Summarize this PDF' },
+      ...images.map(img => ({
+        type: 'image_url',
+        image_url: { url: img.data }
+      }))
+    ]
+  }
+];
+```
 
 ## Getting Started
 
 1. Create a `.env.local` file:
+The API is protected by an API key defined in an enviorment variable, you can set it to anything you want.
+
 ```bash
 API_KEY=your-secret-key-here
 ```
