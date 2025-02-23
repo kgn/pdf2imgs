@@ -5,7 +5,7 @@ A tool to parse PDF files and extract images. This is useful to pass to LLMs tha
 ## Example for OpenAI o1
 
 ```javascript
-// Convert PDF to images
+// Convert PDF to images with pdf2imgs endpoint
 const response = await fetch('/api/convert', {
   method: 'POST',
   headers: {
@@ -17,19 +17,22 @@ const response = await fetch('/api/convert', {
 
 const { images } = await response.json();
 
-// Create OpenAI message with images
-const messages = [
-  {
-    role: 'user',
-    content: [
-      { type: 'text', text: 'Summarize this PDF' },
-      ...images.map(img => ({
-        type: 'image_url',
-        image_url: { url: img.data }
-      }))
-    ]
-  }
-];
+// Pass PDF images to o1 model
+const response = await client.chat.completions.create({
+  model: "o1",
+  messages: [
+    {
+      role: "user",
+      content: [
+        { type: "text", text: "Please summarize this pdf" },
+        ...images.map(img => ({
+          type: "image_url",
+          image_url: { url: img.data }
+        }))
+      ]
+    }
+  ]
+});
 ```
 
 ## Getting Started
