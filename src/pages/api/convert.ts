@@ -1,18 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import * as pdfjsLib from 'pdfjs-dist';
-const { createCanvas } = require('canvas');
+import path from 'path';
+const { createCanvas, registerFont } = require('canvas');
 
-// Configure pdf.js
+// Register a default font
+registerFont(path.join(process.cwd(), 'fonts', 'Arial.ttf'), { family: 'Arial' });
+
+// Basic pdf.js configuration
 pdfjsLib.GlobalWorkerOptions.workerSrc = require('pdfjs-dist/build/pdf.worker.js');
 const NodeCanvasFactory = require('pdfjs-dist/build/pdf.js').NodeCanvasFactory;
 (pdfjsLib as any).NodeCanvasFactory = NodeCanvasFactory;
-
-// Disable font loading to use system defaults
-(pdfjsLib as any).GlobalWorkerOptions.disableFontFace = true;
-
-// Add standard font configuration
-const standardFontDataUrl = require.resolve('pdfjs-dist/standard_fonts/');
-(pdfjsLib as any).GlobalWorkerOptions.standardFontDataUrl = standardFontDataUrl;
 
 export const config = {
   api: {
@@ -70,7 +67,7 @@ export default async function handler(
 
     for (let i = 1; i <= doc.numPages; i++) {
       const page = await doc.getPage(i);
-      const viewport = page.getViewport({ scale: 2.0 });
+      const viewport = page.getViewport({ scale: 4.0 });
       const canvas = createCanvas(viewport.width, viewport.height);
       const context = canvas.getContext('2d');
 
