@@ -50,8 +50,10 @@ export default async function handler(
       readStream.on('end', () => resolve(Buffer.concat(chunks)));
     });
 
-    // Load the PDF document
-    const doc = await pdfjsLib.getDocument(buffer).promise;
+    // Convert Buffer to Uint8Array before passing to pdf.js
+    const uint8Array = new Uint8Array(buffer);
+    // Use uint8Array instead of buffer when loading the PDF
+    const doc = await pdfjsLib.getDocument(uint8Array).promise;
     console.log('PDF loaded successfully, pages:', doc.numPages);
     const images = [];
 
