@@ -9,10 +9,16 @@ export default function Home() {
   const [response, setResponse] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [apiKey, setApiKey] = useState('');
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (!apiKey.trim()) {
+      setError('Please enter an API key');
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -23,8 +29,16 @@ export default function Home() {
 
       const response = await fetch('/api/convert', {
         method: 'POST',
+        headers: {
+          'x-api-key': apiKey,
+        },
         body: formData,
       });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to convert PDF');
+      }
 
       const data = await response.json();
       setResponse(data);
@@ -37,6 +51,16 @@ export default function Home() {
 
   return (
     <div className="p-4">
+      <div className="mb-4">
+        <input
+          type="password"
+          placeholder="Enter API Key"
+          value={apiKey}
+          onChange={(e) => setApiKey(e.target.value)}
+          className="border p-2 mr-2"
+        />
+      </div>
+
       <input
         type="file"
         accept=".pdf"

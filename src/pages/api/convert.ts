@@ -27,6 +27,12 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponseData>
 ) {
+  // Check for API key
+  const apiKey = req.headers['x-api-key'];
+  if (!apiKey || apiKey !== process.env.API_KEY) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
