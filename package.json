@@ -7,15 +7,19 @@
     "start": "next start"
   },
   "dependencies": {
+    "canvas": "^3.1.0",
+    "formidable": "^3.5.1",
     "next": "12.0.4",
     "pdfjs-dist": "2.10.377",
     "react": "17.0.2",
     "react-dom": "17.0.2"
   },
   "devDependencies": {
+    "@types/formidable": "^3.4.5",
+    "@types/node": "^20.0.0",
     "@types/pdfjs-dist": "2.10.378",
-    "@types/react": "^17.0.37",
-    "@types/react-dom": "^17.0.11",
-    "typescript": "^4.5.2"
+    "@types/react": "17.0.2",
+    "@types/react-dom": "17.0.2",
+    "typescript": "^5.0.0"
   }
 }
