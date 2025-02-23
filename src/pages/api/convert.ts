@@ -1,10 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-const pdfjsLib = require('pdfjs-dist');
-const path = require('path');
+import * as pdfjsLib from 'pdfjs-dist';
 const { createCanvas } = require('canvas');
 
-// Set worker path to node build
-pdfjsLib.GlobalWorkerOptions.workerSrc = path.join(process.cwd(), 'node_modules', 'pdfjs-dist', 'build', 'pdf.worker.min.js');
+// Set the worker path to use local version
+pdfjsLib.GlobalWorkerOptions.workerSrc = `/pdf.worker.min.js`;
 
 export const config = {
   api: {
@@ -15,9 +14,16 @@ export const config = {
 import formidable from 'formidable';
 import { createReadStream } from 'fs';
 
+type ResponseData = {
+  error?: string;
+  details?: string;
+  images?: { page: number; data: string }[];
+  // add other response types here
+};
+
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse<ResponseData>
 ) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
