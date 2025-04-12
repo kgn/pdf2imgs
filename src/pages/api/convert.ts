@@ -27,6 +27,11 @@ type ResponseData = {
   // add other response types here
 };
 
+type RequestData = {
+  url?: string;
+  pdf?: string; // Keeping for backward compatibility
+};
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponseData>
@@ -42,8 +47,9 @@ export default async function handler(
   }
 
   try {
-    // Handle both JSON with base64 and raw PDF input
+    // Handle URL, JSON with base64, and raw PDF input
     let uint8Array: Uint8Array;
+    const requestData = req.body as RequestData;
 
     if (req.headers['content-type'] === 'application/pdf') {
       // Handle raw PDF input
@@ -52,14 +58,31 @@ export default async function handler(
         chunks.push(chunk);
       }
       uint8Array = Buffer.concat(chunks);
-    } else {
-      // Handle JSON with base64 input
-      const { pdf } = req.body;
-      if (!pdf) {
-        return res.status(400).json({ error: 'No PDF data provided' });
+    } else if (requestData.url) {
+      // Handle URL input - fetch the PDF from the provided URL
+      try {
+        const response = await fetch(requestData.url);
+        if (!response.ok) {
+          return res.status(400).json({ 
+            error: 'Failed to fetch PDF from URL',
+            details: `HTTP status ${response.status}: ${response.statusText}`
+          });
+        }
+        
+        const arrayBuffer = await response.arrayBuffer();
+        uint8Array = new Uint8Array(arrayBuffer);
+      } catch (fetchError) {
+        return res.status(400).json({ 
+          error: 'Failed to fetch PDF from URL',
+          details: fetchError instanceof Error ? fetchError.message : 'Unknown fetch error'
+        });
       }
-      const buffer = Buffer.from(pdf, 'base64');
+    } else if (requestData.pdf) {
+      // Handle JSON with base64 input (for backward compatibility)
+      const buffer = Buffer.from(requestData.pdf, 'base64');
       uint8Array = new Uint8Array(buffer);
+    } else {
+      return res.status(400).json({ error: 'No PDF URL or data provided' });
     }
 
     // Point to standard fonts directory in project root
